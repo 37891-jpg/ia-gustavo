@@ -1,0 +1,36 @@
+{
+  "name": "samsung-device-manager-backend",
+  "version": "1.0.0",
+  "description": "API REST para gerenciamento de aparelhos Samsung",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "start:memory": "node scripts/start-with-memory-db.js",
+    "seed": "node scripts/seed.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "keywords": [
+    "samsung",
+    "express",
+    "mongodb",
+    "mongoose",
+    "rest-api",
+    "vercel"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.9.5"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.3.0",
+    "supertest": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

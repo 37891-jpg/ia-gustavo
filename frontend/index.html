@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Samsung Device Manager | Gerenciador de Aparelhos</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Fonte Inter via Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230c4da2'><path d='M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z'/></svg>">
+</head>
+<body>
+  <!-- Cabeçalho Principal -->
+  <header class="navbar">
+    <div class="container navbar-content">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+            <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Samsung <span>Device Manager</span></h1>
+          <p class="brand-tagline">Catálogo Oficial de Dispositivos</p>
+        </div>
+      </div>
+
+      <div class="navbar-actions">
+        <!-- Indicador de Status da API -->
+        <div id="api-status-badge" class="status-badge checking" title="Verificando conexão com a API...">
+          <span class="status-dot"></span>
+          <span id="api-status-text">Conectando...</span>
+        </div>
+
+        <button id="btn-novo-aparelho" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          Novo Aparelho
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="container main-content">
+    <!-- Barra de Filtros e Estatísticas -->
+    <section class="toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="search-icon">
+          <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+        <input type="text" id="input-busca" placeholder="Buscar por modelo ou cor..." autocomplete="off">
+        <button id="btn-limpar-busca" class="btn-clear-search hidden" title="Limpar busca">&times;</button>
+      </div>
+
+      <div class="toolbar-stats">
+        <span id="devices-counter" class="devices-counter">0 aparelhos</span>
+        <button id="btn-recarregar" class="btn btn-secondary btn-icon" title="Recarregar aparelhos">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- Estados Visuais -->
+
+    <!-- 1. Estado de Carregamento (Loading Skeleton) -->
+    <section id="state-loading" class="state-container hidden">
+      <div class="skeleton-grid">
+        <div class="skeleton-card">
+          <div class="skeleton-img"></div>
+          <div class="skeleton-line long"></div>
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line medium"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-img"></div>
+          <div class="skeleton-line long"></div>
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line medium"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-img"></div>
+          <div class="skeleton-line long"></div>
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line medium"></div>
+        </div>
+      </div>
+      <p class="loading-label">Carregando aparelhos Samsung...</p>
+    </section>
+
+    <!-- 2. Estado de Erro -->
+    <section id="state-error" class="state-container state-card error-card hidden">
+      <div class="state-icon error-icon">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+      </div>
+      <h2 id="error-title">Falha ao carregar aparelhos</h2>
+      <p id="error-message">Não foi possível estabelecer comunicação com o servidor.</p>
+      <button id="btn-tentar-novamente" class="btn btn-primary">Tentar Novamente</button>
+    </section>
+
+    <!-- 3. Estado de Lista Vazia -->
+    <section id="state-empty" class="state-container state-card empty-card hidden">
+      <div class="state-icon empty-icon">
+        <svg viewBox="0 0 24 24" width="56" height="56" fill="currentColor">
+          <path d="M17 1H7c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2zm0 18H7V5h10v14zM12 16a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+        </svg>
+      </div>
+      <h2>Nenhum aparelho encontrado</h2>
+      <p id="empty-description">Nenhum aparelho Samsung foi cadastrado ainda. Comece adicionando um novo modelo ao catálogo.</p>
+      <button id="btn-cadastrar-vazio" class="btn btn-primary">Cadastrar Primeiro Aparelho</button>
+    </section>
+
+    <!-- 4. Grid de Aparelhos (Sucesso) -->
+    <section id="state-success" class="devices-grid">
+      <!-- Cards renderizados dinamicamente via JS -->
+    </section>
+  </main>
+
+  <!-- Modal de Cadastro / Edição -->
+  <div id="modal-aparelho" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-titulo">Cadastrar Novo Aparelho</h3>
+        <button id="btn-fechar-modal" class="btn-close" aria-label="Fechar modal">&times;</button>
+      </div>
+
+      <form id="form-aparelho" class="modal-form" novalidate>
+        <input type="hidden" id="aparelho-id">
+
+        <!-- Campo Modelo -->
+        <div class="form-group">
+          <label for="input-modelo">Modelo <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="input-modelo" 
+            placeholder="Ex: Galaxy S25 Ultra" 
+            required 
+            maxlength="100"
+          >
+          <span class="field-error" id="error-modelo"></span>
+        </div>
+
+        <!-- Linha Dupla: Cor e Preço -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="input-cor">Cor <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="input-cor" 
+              placeholder="Ex: Titânio Preto" 
+              required 
+              maxlength="50"
+            >
+            <span class="field-error" id="error-cor"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-preco">Preço (R$) <span class="required">*</span></label>
+            <input 
+              type="number" 
+              id="input-preco" 
+              placeholder="Ex: 5999.90" 
+              step="0.01" 
+              min="0" 
+              required
+            >
+            <span class="field-error" id="error-preco"></span>
+          </div>
+        </div>
+
+        <!-- Campo Foto (URL) -->
+        <div class="form-group">
+          <label for="input-foto">URL da Foto <span class="required">*</span></label>
+          <input 
+            type="url" 
+            id="input-foto" 
+            placeholder="https://exemplo.com/foto-galaxy.jpg" 
+            required
+          >
+          <span class="field-error" id="error-foto"></span>
+        </div>
+
+        <!-- Preview da Imagem -->
+        <div class="image-preview-container">
+          <span class="preview-label">Pré-visualização da imagem:</span>
+          <div id="image-preview-box" class="image-preview-box">
+            <img id="img-preview" src="" alt="Preview da foto do aparelho" class="hidden">
+            <span id="preview-placeholder">Insira uma URL válida para visualizar a foto</span>
+          </div>
+        </div>
+
+        <!-- Botões do Modal -->
+        <div class="modal-footer">
+          <button type="button" id="btn-cancelar-form" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" id="btn-salvar-aparelho" class="btn btn-primary">
+            <span id="btn-salvar-texto">Salvar Aparelho</span>
+            <span id="btn-salvar-spinner" class="spinner-small hidden"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmação de Exclusão -->
+  <div id="modal-confirmar-exclusao" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-card modal-confirm">
+      <div class="modal-confirm-icon">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="currentColor">
+          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+        </svg>
+      </div>
+      <h3>Confirmar Exclusão</h3>
+      <p>Tem certeza de que deseja excluir o aparelho <strong id="delete-device-name">Galaxy S25</strong>?</p>
+      <p class="modal-confirm-warning">Esta ação não poderá ser desfeita.</p>
+      <div class="modal-footer">
+        <button type="button" id="btn-cancelar-exclusao" class="btn btn-secondary">Cancelar</button>
+        <button type="button" id="btn-confirmar-exclusao" class="btn btn-danger">
+          <span id="btn-excluir-texto">Excluir Aparelho</span>
+          <span id="btn-excluir-spinner" class="spinner-small hidden"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Container de Toasts (Notificações Flutuantes) -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Script Principal -->
+  <script src="js/app.js"></script>
+</body>
+</html>
